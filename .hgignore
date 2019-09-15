@@ -10,6 +10,7 @@ docs/source/_reference/**
 dist/**
 build/**
 .cache/**
+.pytest_cache/**
 *.x
 *.a
 *.so
@@ -29,5 +30,6 @@ build/**
 *.ind
 *.out
 *.fdb_latexmk
+.DS_Store
 mendeleev.sublime-workspace
 mendeleev.sublime-project

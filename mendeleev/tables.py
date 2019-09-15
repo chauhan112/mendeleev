@@ -66,7 +66,7 @@ class Element(Base):
       atomic_weight : float
         Relative atomic weight as the ratio of the average mass of atoms
         of the element to 1/12 of the mass of an atom of 12C
-      block : int
+      block : str
         Block in periodic table, s, p, d, f
       boiling_point : float
         Boiling temperature in K
@@ -106,10 +106,9 @@ class Element(Base):
       description : str
         Short description of the element
       dipole_polarizability : float
-        Dipole polarizability in atomic units from P. Schwerdtfeger "Table of
-        experimental and calculated static dipole polarizabilities for the
-        electronic ground states of the neutral elements (in atomic units)",
-        February 11, 2014
+        Dipole polarizability in atomic units
+      dipole_polarizability_unc:  float
+        Uncertainty of the dipole polarizability
       discoverers: str
         The discoverers of the element
       discovery_location: str
@@ -130,14 +129,18 @@ class Element(Base):
         Evaporation heat in kJ/mol
       fusion_heat : float
         Fusion heat in kJ/mol
-      gas_basicity : Float
+      gas_basicity : float
         Gas basicity
-      geochemical_class : String
+      geochemical_class : str
         Geochemical classification of the elements
-      goldschmidt_class : String
+      glawe_number: int
+        Glawe number (scale)
+      goldschmidt_class : str
         Goldschmidt classification of the elements
       group : int
-        Group in periodic table
+        Group number
+      group_id : Group
+        Group details
       heat_of_formation : float
         Heat of formation in kJ/mol
       is_monoisotopic : bool
@@ -152,6 +155,8 @@ class Element(Base):
       mass : float
         Relative atomic mass. Ratio of the average mass of atoms
         of the element to 1/12 of the mass of an atom of 12C
+      mendeleev_number : int
+        Mendeleev number
       melting_point : float
         Melting temperature in K
       metallic_radius : Float
@@ -169,6 +174,8 @@ class Element(Base):
         Origin of the name
       period : int
         Period in periodic table
+      pettifor_number: int
+        Pettifor scale
       proton_affinity : Float
         Proton affinity
       series : int
@@ -234,6 +241,7 @@ class Element(Base):
     density = Column(Float)
     description = Column(String)
     dipole_polarizability = Column(Float)
+    dipole_polarizability_unc = Column(Float)
     discoverers = Column(String)
     discovery_location = Column(String)
     discovery_year = Column(Integer)
@@ -246,6 +254,7 @@ class Element(Base):
     fusion_heat = Column(Float)
     gas_basicity = Column(Float)
     geochemical_class = Column(String)
+    glawe_number = Column(Integer)
     goldschmidt_class = Column(String)
     group_id = Column(Integer, ForeignKey("groups.group_id"))
     group = relationship("Group", uselist=False, lazy='subquery')
@@ -256,12 +265,14 @@ class Element(Base):
     lattice_constant = Column(Float)
     lattice_structure = Column(String)
     melting_point = Column(Float)
+    mendeleev_number = Column(Integer)
     metallic_radius = Column(Float)
     metallic_radius_c12 = Column(Float)
     molcas_gv_color = Column(String)
     name = Column(String)
     name_origin = Column(String)
     period = Column(Integer)
+    pettifor_number = Column(Integer)
     proton_affinity = Column(Float)
     _series_id = Column("series_id", Integer, ForeignKey("series.id"))
     _series = relationship("Series", uselist=False, lazy='subquery')
@@ -889,13 +900,23 @@ class Isotope(Base):
 
     def __str__(self):
 
-        return "{0:5d} {1:5d} {2:10.5f}".format(
-            self.atomic_number, self.mass_number, self.mass)
+        afmt = '5.3f'
+        mfmt = '10.5f'
+
+        if self.mass is None:
+            mfmt = ''
+
+        if self.abundance is None:
+            afmt = ''
+
+        return "{0:5d} {1:5d} {2:{mfmt}} {3:{afmt}}".format(
+            self.atomic_number, self.mass_number, self.mass,
+            self.abundance, mfmt=mfmt, afmt=afmt)
 
     def __repr__(self):
 
-        return "<Isotope(Z={}, A={}, mass={})>".format(
-            self.atomic_number, self.mass_number, self.mass)
+        return "<Isotope(Z={}, A={}, mass={}, abundance={})>".format(
+            self.atomic_number, self.mass_number, self.mass, self.abundance)
 
 
 class ScreeningConstant(Base):
